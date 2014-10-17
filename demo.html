@@ -32,9 +32,13 @@ $(function() {
 				$('#debug').append('\n\nRound started\n----------------\n');
 			})
 			.on('weapon_fire', function(data) {
-				var user = this.findPlayer(data.userid);
-				if (user) {
-					$('#debug').append(user.name + ' used ' + data.weapon + "\n");
+				if (user = this.findPlayer(data.userid)) {
+					if (userEntity = this.findPlayerEntity(data.userid)) {
+						if (pos = userEntity.getPos()) {
+
+							$('#debug').append(user.name + ' used ' + data.weapon + ' at ' + pos.x + ',', +pos.y + "\n");
+						}
+					}
 				}
 			});
 
