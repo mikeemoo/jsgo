@@ -30,7 +30,7 @@ $(function() {
 			var demo = new Demo()
 			.on('round_start', function(data) {
 				$('#debug').append('\n\nRound started\n----------------\n');
-			});
+			})
 			.on('weapon_fire', function(data) {
 				var user = this.findPlayer(data.userid);
 				if (user) {
