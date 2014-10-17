@@ -1,0 +1,119 @@
+<html>
+<head>
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="js/bit-buffer.js"></script>
+<script src="js/jdataview.js"></script>
+<script src="js/event-emitter.js"></script>
+<script src="js/protobuf/long.min.js"></script>
+<script src="js/protobuf/bytebufferAB.min.js"></script>
+<script src="js/protobuf/protobuf.min.js"></script>
+<script src="js/classes.js"></script>
+<script src="js/extras.js"></script>
+<script src="js/demo.js"></script>
+<script src="js/entity.js"></script>
+<script src="js/decode.js"></script>
+</head>
+<body>
+<input type="file" id="demo" name="demo" /><br />
+<pre id="debug"></pre>
+<script>
+
+$(function() {
+
+	$('#demo').change(function(e) {
+
+		if (e.target.files.length > 0) {
+
+			var file = e.target.files[0];
+
+			var demo = new Demo();
+
+			demo.on('round_start', function(data) {
+
+				$('#debug').append('\n\nRound started\n----------------\n');
+			});
+
+			demo.on('weapon_fire', function(data) {
+
+				var user = demo.findPlayer(data.userid);
+
+				if (user) {
+					$('#debug').append(user.name + ' used ' + data.weapon + "\n");
+				}
+
+			});
+
+			demo.parse(file);
+
+		}
+	});
+});
+
+/*
+available events:
+
+"data",
+"players_info",
+"entity_added",
+"entity_updated",
+"hltv_chase",
+"cs_pre_restart",
+"round_prestart",
+"player_spawn",
+"bomb_pickup",
+"round_start",
+"round_poststart",
+"begin_new_match",
+"entity_removed",
+"hltv_status",
+"cs_round_start_beep",
+"bomb_dropped",
+"cs_round_final_beep",
+"round_freeze_end",
+"round_announce_match_start",
+"player_footstep",
+"weapon_fire",
+"decoy_started",
+"player_death",
+"buytime_ended",
+"player_jump",
+"round_mvp",
+"cs_win_panel_round",
+"round_end",
+"round_officially_ended",
+"round_announce_warmup",
+"player_team",
+"weapon_zoom",
+"hegrenade_detonate",
+"weapon_reload",
+"player_blind",
+"flashbang_detonate",
+"smokegrenade_detonate",
+"smokegrenade_expired",
+"server_cvar",
+"bomb_beginplant",
+"bomb_planted",
+"bomb_beep",
+"decoy_detonate",
+"bomb_exploded",
+"inferno_startburn",
+"inferno_expire",
+"bomb_begindefuse",
+"bomb_defused",
+"player_falldamage",
+"round_time_warning",
+"round_announce_last_round_half",
+"hltv_fixed",
+"announce_phase_end",
+"player_disconnect",
+"player_connect",
+"player_connect_full",
+"round_announce_match_point",
+"cs_win_panel_match",
+"done"
+*/
+
+</script>
+</body>
+</html>
