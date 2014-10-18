@@ -176,15 +176,16 @@ var Demo = function() {
                             case 0: // EnterPVS
                                 var classIndex = bitStream.readBits(nServerClassBits, false);
                                 var uSerialNum = bitStream.readBits(10, false);
-
                                 var entity = addEntity(entityId, serverClasses[classIndex], uSerialNum);
                                 var paths = entity.readFromStream(bitStream);
                                 self.emit('entity_added', entity);
                                 self.emit('entity_updated', entity, paths);
                                 break;
                             case 1: // LeavePVS
-                                removeEntity(entityId);
-                                self.emit('entity_removed', entityId);
+                            	var removed = removeEntity(entityId);
+                            	if (removed.length > 0) {
+                            	    self.emit('entity_removed', removed[0]);
+								}
                                 break;
                             case 2: // DeltaEnt
                                 var entity = findEntityById(entityId);
@@ -232,8 +233,11 @@ var Demo = function() {
     }
 
     function findEntityByPlayerId(userId) {
-        var index = this.getPlayerIndex(userId) + 1;
-        return this.findEntityById(index);
+        var index = this.getPlayerIndex(userId);
+        if (index != null) {
+    	    return this.findEntityById(index + 1);
+		}
+		return null;
     }
 
     function gatherExcludes(table) {
@@ -364,29 +368,29 @@ var Demo = function() {
                 return entities[i];
             }
         }
-        /*
-                return _.findWhere(entities, {
-                    'entityId': entityId
-                });*/
     }
 
     function removeEntity(entityId) {
         var i = entities.length;
         while (i--) {
             if (entities[i].entityId == entityId) {
-                entities.splice(i, 1);
+                return entities.splice(i, 1);
             }
         }
     }
 
     function addEntity(entityId, classInfo, serialNumber) {
-        removeEntity(entityId);
-        entity = new Entity();
-        entity.entityId = entityId;
-        entity.classInfo = classInfo;
+        var entity = findEntityById(entityId);
+        if (entity == null) {
+			entity = new Entity();
+			entity.entityId = entityId;
+			entity.classInfo = classInfo;
+			entity.generateProperties();
+	        entities.push(entity);
+		} else {
+			entity.classInfo = classInfo;
+		}
         entity.serialNumber = serialNumber;
-        entity.generateProperties();
-        entities.push(entity);
         return entity;
     }
 
@@ -628,6 +632,7 @@ var Demo = function() {
     this.findPlayerById = findPlayerById;
     this.findEntityByPlayerId = findEntityByPlayerId;
     this.findEntityByPlayer = function(p) {
+		if (p == null) return null;
         return this.findEntityByPlayerId(p.userID);
     };
     this.findPlayerByEntity = function(entity) {

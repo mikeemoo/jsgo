@@ -36,6 +36,15 @@ $(function() {
 
 				$('#debug').append('\n\nNew round\n-----------\n');
 			})
+			/*
+			.on('entity_updated', function(entity, paths) {
+				if (entity.entityId == 8) {
+					_.each(paths, function(path) {
+						console.log(path + ' updated to ' + entity.getValue(path));
+					});
+				}
+			})
+			*/
 			.on('player_death', function(data) {
 
 					var player = this.findPlayerById(data.userid);
@@ -43,15 +52,17 @@ $(function() {
 
 					if (entity != null) {
 
+						var team = entity.getTeam();
 						var pos = entity.getPos();
+
 						if (pos != null) {
-
-							$('#debug').append('Player ' + player.name + ' died at ' + pos.x + ', ' + pos.y + "\n");
-
+							$('#debug').append('Player ' + player.name + ' (' + team + ') died at ' + pos.x + ', ' + pos.y + "\n");
 						}
+
 					}
 
-			}).parse(file);
+			})
+			.parse(file);
 
 		}
 	});

@@ -101,7 +101,7 @@ Entity.prototype.isPlayerEntity = function() {
 }
 
 Entity.prototype.getTeam = function() {
-	var v = entity.getValue('m_iTeamNum');
+	var v = this.getValue('m_iTeamNum');
 	if (v == null) {
 		return null;
 	}
