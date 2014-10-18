@@ -23,26 +23,25 @@ $(function() {
 
 	$('#demo').change(function(e) {
 
+		function dumpEntities(demo) {
+			var i = 0;
+			_.each(demo.getPlayers(), function(player) {
+				console.log('player index ' + i + ' is ' + player.userID);
+				i++;
+			});
+			_.each(demo.getEntities(), function(entity) {
+				console.log(entity.entityId + ': ' + entity.classInfo.strName);
+			});
+		}
+
 		if (e.target.files.length > 0) {
 
 			var file = e.target.files[0];
-
 			var demo = new Demo()
-			.on('round_start', function(data) {
-				$('#debug').append('\n\nRound started\n----------------\n');
-			})
-			.on('weapon_fire', function(data) {
-				if (user = this.findPlayer(data.userid)) {
-					if (userEntity = this.findPlayerEntity(data.userid)) {
-						if (pos = userEntity.getPos()) {
-
-							$('#debug').append(user.name + ' used ' + data.weapon + ' at ' + pos.x + ',', +pos.y + "\n");
-						}
-					}
-				}
-			});
-
-			demo.parse(file);
+			.on('player_death', function(data) {
+					var player = this.findPlayerById(data.userid);
+					var entity = this.findEntityByPlayer(player);
+			}).parse(file);
 
 		}
 	});

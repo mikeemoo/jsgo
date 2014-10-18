@@ -10,7 +10,7 @@ var Demo = function() {
     var gameEventDescList = [];
     var entities = [];
     var currentExcludes = [];
-
+	var stringTables = [];
 
     var builder = dcodeIO.ProtoBuf.loadProtoFile('./netmessages_public.proto');
     dcodeIO.ProtoBuf.loadProtoFile('./usermessages_public.proto', null, builder);
@@ -55,20 +55,21 @@ var Demo = function() {
                                 player.fakePlayer = true;
                             }
                             player.userID = params.userid;
-                            if (params.index == null) {
-                                players.push(player);
-                            } else {
-                                if (players[params.index] == null || players[params.index].userID != player.userID) {
+                            if (params.index < players.length) {
+                                if (players[params.index].userID != player.userID) {
                                     players[params.index] = player;
                                 }
+                            } else {
+                                players.push(player);
                             }
                             params = player;
 
                             break;
                         case 'player_disconnect':
-                            var player = findPlayer(params.userid);
+                            var player = findPlayerById(params.userid);
                             if (player != null) {
                                 player.connected = false;
+                                player.userID = -1;
                             }
                             params = {
                                 'reason': params.reason,
@@ -81,6 +82,45 @@ var Demo = function() {
                 }
             }
         },
+        CreateStringTable: {
+			id: 12,
+			msg: builder.build('CSVCMsg_CreateStringTable'),
+			handler: function(msg) {
+				if (msg.name == 'userinfo') {
+					var bitView = new BitView(msg.string_data.buffer);
+					var bitStream = new BitStream(bitView);
+					bitStream._index += msg.string_data.offset * 8;
+					parseStringTableUpdate(bitStream,
+											msg.num_entries,
+											msg.max_entries,
+											msg.user_data_size,
+											msg.user_data_size_bits,
+											msg.user_data_fixed_size);
+				}
+				stringTables.push({
+					tableName: msg.name,
+					maxEntries: msg.max_entries
+				});
+			}
+		},
+        UpdateStringTable: {
+			id: 13,
+			msg: builder.build('CSVCMsg_UpdateStringTable'),
+			handler: function(msg) {
+				var tableInfo = stringTables[msg.table_id];
+				if (tableInfo.tableName == 'userinfo' && tableInfo.maxEntries > msg.num_changed_entries) {
+
+					var bitView = new BitView(msg.string_data.buffer);
+					var bitStream = new BitStream(bitView);
+					bitStream._index += msg.string_data.offset * 8;
+					parseStringTableUpdate(bitStream,
+											msg.num_changed_entries,
+											tableInfo.maxEntries,
+											0, 0, 0,
+											true);
+				}
+			}
+		},
         UserMessage: {
             id: 23,
             msg: builder.build('CSVCMsg_UserMessage'),
@@ -147,7 +187,7 @@ var Demo = function() {
                                 self.emit('entity_removed', entityId);
                                 break;
                             case 2: // DeltaEnt
-                                var entity = findEntity(entityId);
+                                var entity = findEntityById(entityId);
                                 if (entity) {
 									var paths = entity.readFromStream(bitStream);
 									self.emit('entity_updated', entity,  paths);
@@ -176,14 +216,24 @@ var Demo = function() {
         }
     };
 
-    function findPlayer(userId) {
+    function findPlayerById(userId) {
         return _.findWhere(players, {
             userID: userId
         });
     }
 
-	function findPlayerEntity(userId) {
-		return entities[userId - 1];
+	function getPlayerIndex(userId) {
+		for (var i = 0; i < players.length; i++) {
+			if (players[i].userID == userId) {
+				return i;
+			}
+		}
+		return null;
+	}
+
+	function findEntityByPlayerId(userId) {
+		var index = this.getPlayerIndex(userId) + 1;
+		return this.findEntityById(index);
 	}
 
     function gatherExcludes(table) {
@@ -308,7 +358,7 @@ var Demo = function() {
         }
     }
 
-    function findEntity(entityId) {
+    function findEntityById(entityId) {
 		for (var i = 0; i < entities.length; i++) {
 			if (entities[i].entityId == entityId) {
 				return entities[i];
@@ -356,8 +406,72 @@ var Demo = function() {
         }
     }
 
-    function readStringTables(dataView) {
+	function parseStringTableUpdate(bitStream, entries, maxEntries, userDataSize, userDataSizeBits, userDataFixedSize) {
+		var startBitOffset = bitStream._index;
 
+		var lastEntry = -1;
+		var lastDictionaryIndex = -1;
+		var nTemp = maxEntries;
+		var nEntryBits = 0;
+		while (nTemp >>= 1) ++nEntryBits;
+		if (bitStream.readBits(1)) return;
+		for (var i = 0; i < entries; i++){
+
+			var entryIndex = lastEntry + 1;
+			if (!bitStream.readBits(1)) {
+				entryIndex = bitStream.readBits(nEntryBits);
+			}
+			lastEntry = entryIndex;
+			if (entryIndex < 0 || entryIndex > maxEntries) {
+				return;
+			}
+			var entry = '';
+			if (bitStream.readBits(1)) {
+				if (bitStream.readBits(1)) {
+					var index = bitStream.readBits(5);
+					var bytestocopy = bitStream.readBits(5);
+					entry = bitStream.readASCIIString();
+				} else {
+					entry = bitStream.readASCIIString();
+				}
+			}
+
+			var userData = '';
+			var size = 0;
+			if (bitStream.readBits(1)) {
+				if (userDataFixedSize) {
+					if (userDataSizeBits < 8) {
+						// trim off shit. what are these bits??
+						bitStream.readBits(userDataSizeBits);
+					} else {
+						size = userDataSize;
+
+					}
+				} else {
+					size = bitStream.readBits(14);
+				}
+			}
+
+			if (size > 0) {
+				var b = new jDataView(new ArrayBuffer(size), 0, undefined, true);
+				for (var i = 0; i < size; i++) {
+					b.writeUint8(bitStream.readBits(8, false), i);
+				}
+				b.seek(0);
+				var player = new classes.Player();
+				player.readFromStream(b);
+				if (entryIndex < players.length) {
+					players[entryIndex] = player;
+				} else {
+					players.push(player);
+				}
+				self.emit('player_updated', player);
+			}
+		}
+	}
+
+    function readStringTables(dataView) {
+		players = [];
         var size = dataView.getInt32();
         var chunk = dataView.chunk(size);
         var bitView = new BitView(chunk.buffer);
@@ -366,9 +480,12 @@ var Demo = function() {
 
         for (var i = 0; i < numTables; i++) {
 
-            var tableName = bitStream.readASCIIString();
+            var tableName = bitStream.readASCIIString(); // get table name
 
             var isUserInfo = tableName == 'userinfo';
+
+            // dump string info {
+
             var numstrings = bitStream.readInt16(true);
 
             for (var j = 0; j < numstrings; j++) {
@@ -378,7 +495,7 @@ var Demo = function() {
                 if (bitStream.readBits(1)) {
 
                     var userDataSize = bitStream.readInt16(true);
-                    if (isUserInfo && userData != '') {
+                    if (isUserInfo) {
 
                         var b = new jDataView(new ArrayBuffer(userDataSize), 0, undefined, true);
                         for (var i = 0; i < userDataSize; i++) {
@@ -391,19 +508,14 @@ var Demo = function() {
                         players.push(player);
 
                     } else {
-                        var userData = bitStream.readBits(userDataSize * 8);
+                        var d = bitStream.readBits(userDataSize * 8);
                     }
                 }
             }
             if (isUserInfo) self.emit('players_info', players);
             bitStream.readBits(1);
+            // }
         }
-    }
-
-    function throwError() {
-        clearInterval(processingInterval);
-        processingInterval = null;
-        self.emit('error');
     }
 
     this.parse = function(file) {
@@ -421,77 +533,86 @@ var Demo = function() {
 
                 while (iterations-- && processingInterval != null) {
 
-                    var cmdFields = classes.cmdHeader(dataView);
+					try {
 
-                    self.emit('data');
+						var cmdFields = classes.cmdHeader(dataView);
 
-                    switch (cmdFields.cmd) {
-                        case 1:
-                        case 2:
-                            dataView.skip(160);
-                            var chunkSize = dataView.getInt32();
-                            var chunk = dataView.chunk(chunkSize);
-                            while (chunk.tell() < chunk.byteLength) {
-                                readMessage(chunk);
-                            }
+						self.emit('data');
 
-                            break;
+						switch (cmdFields.cmd) {
+							case 1:
+							case 2:
+								dataView.skip(160);
+								var chunkSize = dataView.getInt32();
+								var chunk = dataView.chunk(chunkSize);
+								while (chunk.tell() < chunk.byteLength) {
+									readMessage(chunk);
+								}
 
-                        case 3: //dem_synctick
-                        case 8: //dem_customdata
-                            break;
+								break;
 
-                        case 4: //dem_consolecmd
-                            var size = dataView.getInt32();
-                            dataView.skip(size);
-                            break;
+							case 3: //dem_synctick
+							case 8: //dem_customdata
+								break;
 
-                        case 9: //dem_stringtables
-                            readStringTables(dataView);
-                            break;
+							case 4: //dem_consolecmd
+								var size = dataView.getInt32();
+								dataView.skip(size);
+								break;
 
-                        case 6: //dem_datatables
-                            var size = dataView.getInt32();
-                            var chunk = dataView.chunk(size);
+							case 9: //dem_stringtables
+								readStringTables(dataView);
+								break;
 
-                            while (true) {
-                                var msg = readMessage(chunk, true);
-                                dataTables.push(msg);
-                                if (msg.is_end) break;
-                            }
+							case 6: //dem_datatables
+								var size = dataView.getInt32();
+								var chunk = dataView.chunk(size);
 
-                            var numberOfServerClasses = chunk.getInt16();
-                            for (var i = 0; i < numberOfServerClasses; i++) {
-                                currentExcludes = [];
-                                var srvClass = classes.serverClass(chunk);
-                                srvClass.dataTable = _.findWhere(dataTables, {
-                                    net_table_name: srvClass.strDTName
-                                });
-                                gatherExcludes(srvClass.dataTable);
-                                gatherProps(srvClass.dataTable, srvClass);
-                                sortProps(srvClass.flattenedProps);
-                                serverClasses.push(srvClass);
-                            }
+								while (true) {
+									var msg = readMessage(chunk, true);
+									dataTables.push(msg);
+									if (msg.is_end) break;
+								}
 
-                            var tmp = numberOfServerClasses;
-                            nServerClassBits = 0;
-                            while (tmp >>= 1) ++nServerClassBits;
-                            nServerClassBits++;
-                            break;
+								var numberOfServerClasses = chunk.getInt16();
+								for (var i = 0; i < numberOfServerClasses; i++) {
+									currentExcludes = [];
+									var srvClass = classes.serverClass(chunk);
+									srvClass.dataTable = _.findWhere(dataTables, {
+										net_table_name: srvClass.strDTName
+									});
+									gatherExcludes(srvClass.dataTable);
+									gatherProps(srvClass.dataTable, srvClass);
+									sortProps(srvClass.flattenedProps);
+									serverClasses.push(srvClass);
+								}
 
-                        case 5: //dem_usercmd
-                            var outgoing_sequence = dataView.getInt32();
-                            var size = dataView.getInt32();
-                            dataView.skip(size);
-                            break;
+								var tmp = numberOfServerClasses;
+								nServerClassBits = 0;
+								while (tmp >>= 1) ++nServerClassBits;
+								nServerClassBits++;
+								break;
 
-                        case 7: //dem_stop
-                            clearInterval(processingInterval);
-                            processingInterval = null;
-                            self.emit('done');
-                            break;
+							case 5: //dem_usercmd
+								var outgoing_sequence = dataView.getInt32();
+								var size = dataView.getInt32();
+								dataView.skip(size);
+								break;
 
-                    }
+							case 7: //dem_stop
+								clearInterval(processingInterval);
+								processingInterval = null;
+								self.emit('done');
+								break;
+
+						}
+					} catch (e) {
+
+						clearInterval(processingInterval);
+						processingInterval = null;
+						self.emit('error', e);
+						throw e;
+					}
                 }
 
             }, 1);
@@ -499,17 +620,22 @@ var Demo = function() {
         reader.readAsArrayBuffer(file);
     }
 
-	this.findEntity = findEntity;
-    this.findPlayer = findPlayer;
-    this.findPlayerEntity = findPlayerEntity;
-    this.getPlayers = function() { return players; };
+	this.getEntities = function() {
+		return entities;
+	}
+	this.findEntityById = findEntityById;
+    this.findPlayerById = findPlayerById;
+    this.findEntityByPlayerId = findEntityByPlayerId;
+    this.findEntityByPlayer = function(p) { return this.findEntityByPlayerId(p.userID); };
     this.findPlayerByEntity = function(entity) {
 		var index = entities.indexOf(entity);
 		if (index == -1) {
 			return null;
 		}
-		return findPlayer(index + 1);
+		return findPlayerById(index + 1);
 	}
+    this.getPlayers = function() { return players; };
+    this.getPlayerIndex = getPlayerIndex;
 }
 
 Demo.prototype = new EventEmitter();

@@ -1,3 +1,5 @@
+var uniqueId = 0;
+
 function readFieldIndex(bitStream, lastIndex, newWay) {
     if (newWay) {
         if (bitStream.readBits(1)) {
@@ -47,12 +49,12 @@ function getObj(data, path) {
 }
 
 var Entity = function() {
+	this.uniqueId = uniqueId++;
 	this.data = {};
+	this.classInfo = null;
+	this.entityId = null;
+	this.serialNumber = null;
 };
-Entity.prototype.classInfo = null;
-Entity.prototype.entityId = null;
-Entity.prototype.serialNumber = null;
-Entity.prototype.data = null;
 Entity.prototype.getData = function() { return this.data; };
 Entity.prototype.readFromStream = function(bitStream) {
     var fieldIndices = [];
@@ -72,9 +74,9 @@ Entity.prototype.readFromStream = function(bitStream) {
 }
 
 Entity.prototype.generateProperties = function() {
-    //for (var i = 0; i < this.classInfo.flattenedProps.length; i++) {
-       // this.setValue(this.classInfo.flattenedProps[i].path, null, true);
-    //}
+    for (var i = 0; i < this.classInfo.flattenedProps.length; i++) {
+       this.setValue(this.classInfo.flattenedProps[i].path, null, true);
+    }
 }
 
 Entity.prototype.getValue = function(path) {
@@ -85,6 +87,13 @@ Entity.prototype.getValue = function(path) {
 Entity.prototype.setValue = function(path, value, dontfire) {
     var o = getObj(this.data, path);
     o.obj[o.property] = value;
+
+	if (this.entityId == 5 && path == 'csnonlocaldata.m_vecOrigin' && value != null) {
+		//console.log(o, value);
+		//console.log(this.data);
+
+	}
+
 }
 
 Entity.prototype.isPlayerEntity = function() {
