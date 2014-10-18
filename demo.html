@@ -23,24 +23,34 @@ $(function() {
 
 	$('#demo').change(function(e) {
 
-		function dumpEntities(demo) {
-			var i = 0;
-			_.each(demo.getPlayers(), function(player) {
-				console.log('player index ' + i + ' is ' + player.userID);
-				i++;
-			});
-			_.each(demo.getEntities(), function(entity) {
-				console.log(entity.entityId + ': ' + entity.classInfo.strName);
-			});
-		}
-
 		if (e.target.files.length > 0) {
 
 			var file = e.target.files[0];
 			var demo = new Demo()
+			.on('begin_new_match', function(data) {
+
+				$('#debug').append('New match start\n-----------\n\n');
+
+			})
+			.on('round_start', function(data) {
+
+				$('#debug').append('\n\nNew round\n-----------\n');
+			})
 			.on('player_death', function(data) {
+
 					var player = this.findPlayerById(data.userid);
 					var entity = this.findEntityByPlayer(player);
+
+					if (entity != null) {
+
+						var pos = entity.getPos();
+						if (pos != null) {
+
+							$('#debug').append('Player ' + player.name + ' died at ' + pos.x + ', ' + pos.y + "\n");
+
+						}
+					}
+
 			}).parse(file);
 
 		}
