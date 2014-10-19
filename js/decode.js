@@ -81,7 +81,7 @@ function vectorDecode(bitStream, sendProp) {
     if ((sendProp.flags & (1 << 5)) == 0) {
         v.z = floatDecode(bitStream, sendProp);
     } else {
-        var signBit = bitStream.readBit(1);
+        var signBit = bitStream.readBits(1);
         var v0v0v1v1 = v.x * v.x + v.y * v.y;
         if (v0v0v1v1 < 1) {
             v.z = Math.sqrt(1 - v0v0v1v1);

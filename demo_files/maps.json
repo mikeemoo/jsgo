@@ -1,0 +1,32 @@
+{
+	"de_dust2": {
+		"overview": 	"demo_files/de_dust2.jpg",
+		"pos_x"	:	-2400,
+		"pos_y"	:	3383,
+		"scale"	:	4.4
+	},
+	"de_mirage": {
+		"overview": 	"demo_file/de_mirage.jpg",
+		"pos_x"	:	-3230,
+		"pos_y"	:	1713,
+		"scale"	:	5.00
+	},
+	"de_cache": {
+		"overview": 	"demo_files/de_cache.jpg",
+		"pos_x"	:	-2278,
+		"pos_y"	:	3469,
+		"scale"	:	5.5
+	},
+	"de_inferno": {
+		"overview":	"demo_files/de_inferno.jpg",
+		"pos_x"	:	-2200,
+		"pos_y"	:	4400,
+		"scale"	:	5.9
+	},
+	"de_nuke": {
+		"overview": 	"demo_files/de_nuke.jpg",
+		"pos_x":	-3050,
+		"pos_y":	2200,
+		"scale":	6.5
+	}
+}

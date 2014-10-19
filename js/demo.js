@@ -532,6 +532,8 @@ var Demo = function() {
             var dataView = new jDataView(reader.result, 0, undefined, true);
             var header = classes.header(dataView);
 
+			self.emit('server_info', header);
+
             processingInterval = setInterval(function() {
 
                 var iterations = 50;

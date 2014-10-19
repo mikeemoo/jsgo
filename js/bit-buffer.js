@@ -348,7 +348,18 @@ BitStream.prototype.readBitCoord = function() {
 	}
 	return value;
 }
+BitStream.prototype.readBitNormal = function() {
 
+	var signbit = this.readBits(1);
+	var fractval = this.readBits(11);
+	var value = fractval * (1/((1<<11)-1));
+
+	// Fixup the sign if negative.
+	if ( signbit )
+		value = -value;
+
+	return value;
+}
 BitStream.prototype.readBitCellCoord = function(bits, coordType)
 {
 	var bIntegral = coordType == 2;

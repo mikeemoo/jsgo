@@ -6,7 +6,7 @@ Most in-game actions are fired as events which you can subscribe to, and the mai
 
 Demo
 ------
-A simple demo can be found [here](http://mikeemoo.github.io/jsgo/demo.html). It will display any player deaths
+A simple demo can be found [here](http://mikeemoo.github.io/jsgo/demo.html). It will display any time a player has been blinded by a flashbang
 
 Example
 ------
@@ -33,6 +33,7 @@ Example
 Events
 -----
 - data
+- server_info
 - players_info
 - entity_added
 - entity_updated

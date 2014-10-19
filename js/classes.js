@@ -6,13 +6,13 @@ var eventValueTypes = [
 var header = function(stream) {
     return {
 
-        'filestamp': stream.getString(8),
+        'filestamp': stream.getTerminatedString(8),
         'demoprotocol': stream.getInt32(),
         'networkprotocol': stream.getInt32(),
-        'servername': stream.getString(260),
-        'clientname': stream.getString(260),
-        'mapname': stream.getString(260),
-        'gamedirectory': stream.getString(260),
+        'servername': stream.getTerminatedString(260),
+        'clientname': stream.getTerminatedString(260),
+        'mapname': stream.getTerminatedString(260),
+        'gamedirectory': stream.getTerminatedString(260),
         'playback_time': stream.getFloat32(),
         'playback_ticks': stream.getInt32(),
         'playback_frames': stream.getInt32(),
