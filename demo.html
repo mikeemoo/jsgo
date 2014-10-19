@@ -51,7 +51,7 @@ $(function() {
 					var raster = new Raster(map.overview, view.center);
 				})
 
-				.on('player_jump', function(data) {
+				.on('player_blind', function(data) {
 
 					var player = this.findPlayerById(data.userid);
 					var entity = this.findEntityByPlayer(player);
