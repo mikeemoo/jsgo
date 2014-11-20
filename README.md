@@ -7,7 +7,7 @@ Once parsing starts most data is sent in the form of events. From there you can 
 
 for example:
 
-```
+```javascript
 var fs = require('fs');
 var JSGO = require('./lib/jsgo');
 
