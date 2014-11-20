@@ -107,12 +107,25 @@ game.round_announce_match_point
 game.cs_win_panel_match
 ```
 
+JSGO Methods
+-------------
+```javascript
+demo.findEntityById(entityId);
+demo.findEntityByPlayer(playerObject);
+demo.findEntityByPlayerId(playerId);
+demo.findPlayerByEntity(entityObject);
+demo.findPlayerById(playerId);
+demo.findPlayerByEntityId(entityId);
+```
+
+
 Entity Methods
 -----------
 
-```e.getPos()
-e.getEyeAngle()
-e.getHealth()
-e.getTeam()
-e.getData()
+```javascript
+e.getPos();
+e.getEyeAngle();
+e.getHealth();
+e.getTeam();
+e.getData();
 ```
