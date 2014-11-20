@@ -123,9 +123,9 @@ Entity Methods
 -----------
 
 ```javascript
-e.getPos();
-e.getEyeAngle();
-e.getHealth();
-e.getTeam();
-e.getData();
+myEntity.getPos();
+myEntity.getEyeAngle();
+myEntity.getHealth();
+myEntity.getTeam();
+myEntity.getData();
 ```
