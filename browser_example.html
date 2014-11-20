@@ -1,0 +1,32 @@
+<html>
+
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="lib/jsgo.js"></script>
+</head>
+
+<body>
+    <input type="file" id="demo" name="demo" style="display: none" />
+    <br />
+    <script>
+        $(function() {
+
+            $('#demo').show().change(function(e) {
+
+                if (e.target.files.length > 0) {
+
+                    var file = e.target.files[0];
+
+                    var demo = new JSGO()
+                        .onAny(function(e) {
+                            console.log(this.event);
+                        })
+                        .parse(file);
+
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
