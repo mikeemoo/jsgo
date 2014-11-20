@@ -19,7 +19,8 @@ fs.readFile('demo.dem', function(err, data) {
     var entity = this.findEntityByPlayer(player);
     var position = entity.getPos();
     
-    console.log(player.name + ' used weapon ' + event.weapon + ' at ' + position.x + ', ' + position.y + ', ' + position.z);
+    console.log(player.name + ' used weapon ' + event.weapon + 
+                ' at ' + position.x + ', ' + position.y + ', ' + position.z);
   
   }).parse(data);
   
