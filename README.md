@@ -123,9 +123,16 @@ Entity Methods
 -----------
 
 ```javascript
+myEntity.isPlayer();
 myEntity.getPos();
 myEntity.getEyeAngle();
 myEntity.getHealth();
 myEntity.getTeam();
 myEntity.getData();
+myEntity.getArmor();
+myEntity.isWeapon();
+myEntity.isDecoyGrenade();
+myEntity.isSmokeGrenade();
+myEntity.isFlashbang();
+myEntity.isHEGrenade();
 ```
