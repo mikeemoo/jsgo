@@ -138,6 +138,16 @@ player.getEyeAngle();
 player.getPosition();
 player.getAimPunchAngle();
 player.isSpotted();
+player.hasHelmet();
+player.getCurrentEquipmentValue();
+player.getRoundStartCash();
+player.getCurrentCash();
+player.getLastPlaceName();
+player.getRoundKills();
+player.getRoundHeadshotKills();
+player.isScoped();
+player.isWalking();
+player.hasDefuser();
 ```
 
 Class Team extends Entity
