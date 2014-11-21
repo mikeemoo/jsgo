@@ -20,11 +20,11 @@ fs.readFile('demo.dem', function(err, data) {
 
   new jsgo.Demo().on('game.weapon_fire', function(event) {
     
-            var player = event.player;
-            var position = player.getPos();
+    var player = event.player;
+    var position = player.getPos();
 
-            console.log(player.getName() + ' used weapon ' +
-            			event.weapon + ' at ' + position.x + ', ' + position.y + ', ' + position.z);
+    console.log(player.getName() + ' used weapon ' +
+            	event.weapon + ' at ' + position.x + ', ' + position.y + ', ' + position.z);
   
   }).parse(data);
   
