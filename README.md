@@ -129,10 +129,12 @@ myEntity.getEyeAngle();
 myEntity.getHealth();
 myEntity.getTeam();
 myEntity.getData();
-myEntity.getArmor();
+myEntity.getArmorValue();
+myEntity.getAimPunchAngle();
 myEntity.isWeapon();
 myEntity.isDecoyGrenade();
 myEntity.isSmokeGrenade();
 myEntity.isFlashbang();
 myEntity.isHEGrenade();
+myEntity.isSpotted();
 ```
