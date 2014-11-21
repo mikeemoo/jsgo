@@ -1,0 +1,56 @@
+<html>
+
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="../lib/jsgo.js"></script>
+</head>
+
+<body>
+    <input type="file" id="demo" name="demo" style="display: none" />
+    <br />
+    <script>
+        $(function() {
+
+            $('#demo').show().change(function(e) {
+
+                if (e.target.files.length > 0) {
+
+                    var reader = new FileReader();
+                    reader.onload = function() {
+
+                    	var previousRound = 0;
+
+                        var myDemo = new jsgo.Demo().
+                        on('game.round_end', function(event) {
+
+                            console.log('ROUND ' + (previousRound + 1));
+
+                            previousRound = 0;
+                            var teams = this.getTeams();
+
+                            for (var i = 0; i < teams.length; i++) {
+
+                                var team = teams[i];
+                                var side = team.getSide();
+
+                                if (side == 'TERRORIST' || side == 'CT') {
+                                    console.log(team.getSide() + ' (' + teams[i].getClanName() + '): ' + team.getScore());
+                                    previousRound += team.getScore();
+                                }
+                            }
+
+                            console.log('--------');
+
+                        }).
+                        parse(new Uint8Array(reader.result));
+
+                    }
+                    reader.readAsArrayBuffer(e.target.files[0]);
+
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
