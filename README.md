@@ -14,18 +14,17 @@ Example
 
 ```javascript
 var fs = require('fs');
-var JSGO = require('jsgo');
+var jsgo = require('jsgo');
 
 fs.readFile('demo.dem', function(err, data) {
 
-  new JSGO().on('game.weapon_fire', function(event) {
+  new jsgo.Demo().on('game.weapon_fire', function(event) {
     
-    var player = this.findPlayerById(event.userid);
-    var entity = this.findEntityByPlayer(player);
-    var position = entity.getPos();
-    
-    console.log(player.name + ' used weapon ' + event.weapon + 
-                ' at ' + position.x + ', ' + position.y + ', ' + position.z);
+            var player = event.player;
+            var position = player.getPos();
+
+            console.log(player.getName() + ' used weapon ' +
+            			event.weapon + ' at ' + position.x + ', ' + position.y + ', ' + position.z);
   
   }).parse(data);
   
@@ -47,7 +46,6 @@ NiP-GeT_RiGhT-A- EIZO used weapon smokegrenade at -617.7000122070312, 2168.05273
 Events
 -----
 ```demo_header
-server_command
 server_info
 player_added
 entity_added
@@ -107,34 +105,50 @@ game.round_announce_match_point
 game.cs_win_panel_match
 ```
 
-JSGO Methods
+Class Demo
 -------------
 ```javascript
 demo.findEntityById(entityId);
-demo.findEntityByPlayer(playerObject);
-demo.findEntityByPlayerId(playerId);
-demo.findPlayerByEntity(entityObject);
-demo.findPlayerById(playerId);
-demo.findPlayerByEntityId(entityId);
+demo.findEntityByUserId(userId);
+demo.getTick();
+demo.getTeams();
+demo.getPlayers();
+demo.getEntities(type);
+demo.parse(buffer);
 ```
 
-
-Entity Methods
------------
-
+Class Entity
+------------
 ```javascript
-myEntity.isPlayer();
-myEntity.getPos();
-myEntity.getEyeAngle();
-myEntity.getHealth();
-myEntity.getTeam();
-myEntity.getData();
-myEntity.getArmorValue();
-myEntity.getAimPunchAngle();
-myEntity.isWeapon();
-myEntity.isDecoyGrenade();
-myEntity.isSmokeGrenade();
-myEntity.isFlashbang();
-myEntity.isHEGrenade();
-myEntity.isSpotted();
+entity.getData();
+```
+
+Class Player extends Entity
+------------
+```javascript
+player.getName();
+player.isHLTV();
+player.isFakePlayer();
+player.getGuid();
+player.getUserId();
+player.getHealth();
+player.getArmorValue();
+player.getTeam(demo);
+player.getEyeAngle();
+player.getPosition();
+player.getAimPunchAngle();
+player.isSpotted();
+```
+
+Class Team extends Entity
+------------
+```javascript
+team.getTeamNumber();
+team.getSide();
+team.getClanName();
+team.getFlag();
+team.getScore();
+team.getFirstHalfScore();
+team.getSecondHalfScore();
+team.getPlayers(demo);
 ```

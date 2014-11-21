@@ -1,24 +1,20 @@
 var fs = require('fs');
-var JSGO = require('./lib/jsgo');
+var jsgo = require('./lib/jsgo');
 
-fs.readFile('demo.dem', function(err, data) {
+fs.readFile('../79_fnatic-team-ldlc_de_cache.dem', function(err, data) {
 
-    var myDemo = new JSGO();
-    var tick = 0;
+    var myDemo = new jsgo.Demo();
 
-    myDemo.on('server_command', function(e) {
-            tick = e.tick;
-        })
-        .on('game.weapon_fire', function(e) {
+    myDemo.on('game.weapon_fire', function(event) {
 
-            var player = this.findPlayerById(e.userid);
-            var entity = this.findEntityByPlayer(player);
-            var position = entity.getPos();
+            var player = event.player;
+            var position = player.getPosition();
 
-            console.log(player.name + ' used weapon ' + e.weapon + ' at ' + position.x + ', ' + position.y + ', ' + position.z);
+            console.log(player.getName() + ' used weapon ' +
+            			event.weapon + ' at ' + position.x + ', ' + position.y + ', ' + position.z);
         })
         .onAny(function(e) {
-            //console.log(tick, this.event, e);
+            //console.log(this.event);
         }).parse(data);
 
 });
