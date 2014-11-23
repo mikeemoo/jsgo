@@ -5,6 +5,8 @@ A javascript library for reading CS:GO demo files. It supports both the browser 
 
 Once parsing starts most data is sent in the form of events. From there you can look up entity properties if needed for additional information.
 
+Contact me on [irc.esper.net #jsgo](http://chat.mibbit.com/?channel=%23chat&server=irc.mibbit.net).
+
 Installing in node
 ---------
 ```npm install jsgo```
