@@ -5,5 +5,20 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/mikeemoo/jsgo.git"
+  },
+  "devDependencies": {
+    "chai": "^3.2.0",
+    "events": "^1.0.2",
+    "istanbul": "^0.3.17",
+    "jscs": "^2.0.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.2.5"
+  },
+  "scripts": {
+    "lint": "jshint .",
+    "checkStyle": "./node_modules/.bin/jscs .",
+    "etest": "npm run-script lint && npm run-script checkStyle",
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha test/ -- --recursive -R spec",
+    "posttest": "./node_modules/.bin/istanbul check-coverage && rm -rf coverage"
   }
 }
