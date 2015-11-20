@@ -1,6 +1,9 @@
 JSGO
 ====
 
+Sorry for my lack of updates on this. I'm aware its not working with latest demo files. I've been extremely busy - I'll be launching a new version soon
+-------------------------
+
 A javascript library for reading CS:GO demo files. It supports both the browser and node.js.
 
 Once parsing starts most data is sent in the form of events. From there you can look up entity properties if needed for additional information.
